@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphene", "Graphene.csproj", "{553C9573-3EE9-461A-8C13-F221894424F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphene", "Graphene\Graphene.csproj", "{553C9573-3EE9-461A-8C13-F221894424F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphene.UnitTest", "..\Graphene.UnitTest\Graphene.UnitTest.csproj", "{8415AE15-9593-4646-A6F9-36A48A819EF6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphene.UnitTest", "Graphene.UnitTest\Graphene.UnitTest.csproj", "{8415AE15-9593-4646-A6F9-36A48A819EF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
