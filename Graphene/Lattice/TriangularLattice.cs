@@ -87,12 +87,25 @@ namespace Graphene.Lattice
         public List<Site> GetNearestSitesToPoint(CartesianCoord point)
         {
             var hexCoord = point.ToHexCoord();
-            var x = Math.Round(hexCoord.X);
-            var z = Math.Round(hexCoord.Z);
-            var y = -x - z;
-            var roundedHex = new HexCoord(x, y, z);
+            var rx = Math.Round(hexCoord.X);
+            var ry = Math.Round(hexCoord.Y);
+            var rz = Math.Round(hexCoord.Z);
+
+            var xDiff = hexCoord.X % 1;
+            var yDiff = hexCoord.Y % 1;
+            var zDiff = hexCoord.Z % 1;
+
+            if (xDiff > yDiff && xDiff > zDiff)
+                rx = -ry - rz;
+            else if (yDiff > zDiff)
+                ry = -rx - rz;
+            else
+                rz = -rx - ry;
+
+            var roundedHex = new HexCoord(rx, ry, rz);
+            var nearestSite = Sites.Where(s => s.Value.X == rx && s.Value.Y == ry && s.Value.Z == rz).Single();
             MainWindow.Label.Text = roundedHex.ToString();
-            HighlightSite(roundedHex);
+            HighlightSite(nearestSite.Value);
             return null;
         }
 
@@ -110,6 +123,7 @@ namespace Graphene.Lattice
             return (count % 2 == 0) ? count-- : count;
         }
 
+        [Obsolete]
         private double stepDown(double y)
         {
             return y - (Math.Sqrt(3) / 2);
@@ -263,7 +277,7 @@ namespace Graphene.Lattice
             return totalSites - innerSites;
         }
 
-        public void HighlightSite(HexCoord hexCoord)
+        public void HighlightSite(Site site)
         {
             if (Grid.Canvas.Children.Contains(Cursor))
                 Grid.Canvas.Children.Remove(Cursor);
@@ -271,7 +285,7 @@ namespace Graphene.Lattice
             Cursor.Height = 20;
             Cursor.Width = 20;
             Cursor.Stroke = Brushes.Cornsilk;
-            Grid.AddShape(Cursor, hexCoord.ToCartesian());
+            Grid.AddShape(Cursor, site.Location.ToAbsolute());
         }
     }
 }

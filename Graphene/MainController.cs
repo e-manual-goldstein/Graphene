@@ -8,6 +8,7 @@ namespace Graphene
 {
     public class MainController
     {
+        //TODO: Finish or Drop this
         public List<IService> InitialiseServices(MainWindow mainWindow)
         {
             var members = mainWindow.GetType().GetProperties();

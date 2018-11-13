@@ -62,9 +62,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Graphene\Graphene.csproj">
+    <ProjectReference Include="..\Graphene\Graphene.App.csproj">
       <Project>{553c9573-3ee9-461a-8c13-f221894424f5}</Project>
-      <Name>Graphene</Name>
+      <Name>Graphene.App</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
