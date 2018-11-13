@@ -28,15 +28,5 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E7553DD4-6249-477A-8A28-DB3F3C54567D}
 	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://kevinisaplaceonearth.visualstudio.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Graphene.csproj
-		SccLocalPath1 = .
-		SccProjectUniqueName2 = ..\\Graphene.UnitTest\\Graphene.UnitTest.csproj
-		SccProjectName2 = ../Graphene.UnitTest
-		SccLocalPath2 = ..\\Graphene.UnitTest
-	EndGlobalSection
+	
 EndGlobal

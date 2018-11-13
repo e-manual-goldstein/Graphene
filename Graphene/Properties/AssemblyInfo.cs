@@ -7,12 +7,10 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Graphene")]
+[assembly: AssemblyTitle("Graphene.App")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DSP")]
-[assembly: AssemblyProduct("Graphene")]
-[assembly: AssemblyCopyright("Copyright © DSP 2016")]
+[assembly: AssemblyProduct("Graphene.App")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
