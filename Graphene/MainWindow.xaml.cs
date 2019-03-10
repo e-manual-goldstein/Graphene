@@ -68,7 +68,7 @@ namespace Graphene
             testPoint.Height = 20;
             testPoint.Width = 20;
             testPoint.Fill = Brushes.Chartreuse;
-            Grid.AddShape(testPoint, greenLattice.Sites[20].Location);
+            //Grid.AddShape(testPoint, greenLattice.Sites[20].Location);
             
 
           

@@ -10,7 +10,7 @@ namespace Graphene
     {
         public static double SiteMarkerSize = 6;
 
-        public static double UnitLength = 60;
+        public static double UnitLength = 100;
 
         public static double DefaultMarginSize = 50;
 

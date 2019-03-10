@@ -18,6 +18,7 @@ namespace Graphene.Lattice
             Id = siteId;
             Location = location;
             Marker = new Ellipse();
+            HexLines = new List<HexLine>();
             Marker.Height = Constants.SiteMarkerSize;
             Marker.Width = Constants.SiteMarkerSize;
             X = (int) x;
@@ -41,6 +42,8 @@ namespace Graphene.Lattice
                     return null;
             }
         }
+
+        public List<HexLine> HexLines { get; set; }
 
         public CartesianCoord Location { get; set; }
         

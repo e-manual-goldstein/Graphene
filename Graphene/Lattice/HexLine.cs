@@ -17,6 +17,10 @@ namespace Graphene.Lattice
         public Line Line { get; set; }
         public bool Flash { get; set; }
         public Dimension Dimension { get; set; }
+        public bool Active { get; set; }
+
+        public Site Source { get; set; }
+        public Site Target { get; set; }
 
         public HexLine(Dimension dimension, Site source, int id, BaseGrid grid)
         {
@@ -38,6 +42,10 @@ namespace Graphene.Lattice
         public HexLine(Site source, Site target, int id, BaseGrid grid)
         {
             Id = id;
+            Source = source;
+            Source.HexLines.Add(this);
+            Target = target;
+            Target.HexLines.Add(this);
             Line = new Line();
             Line.X1 = source.Location.ToAbsolute().X;
             Line.Y1 = source.Location.ToAbsolute().Y;
@@ -57,17 +65,26 @@ namespace Graphene.Lattice
 
         public void SwitchOn()
         {
+            Active = true;
             Canvas.SetZIndex(Line, 1);
             Line.Stroke = Brushes.Red;
             Line.StrokeThickness = 10;   
         }
 
         public void SwitchOff()
-        { 
+        {
+            Active = false;
             Canvas.SetZIndex(Line, 0);
             Line.Stroke = Brushes.Gray;
-            Line.StrokeThickness = 10;
+            Line.StrokeThickness = 5;
         }
 
+        public void Toggle()
+        {
+            if (Active)
+                SwitchOff();
+            else
+                SwitchOn();
+        }
     }
 }

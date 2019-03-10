@@ -124,8 +124,19 @@ namespace Graphene.Lattice
         {
             var senderType = sender.GetType();
             var position = e.GetPosition(sender as Canvas);
-            var nearestPoints = GetNearestSitesToPoint(new CartesianCoord(position, false));
+            var nearestSites = GetNearestSitesToPoint(new CartesianCoord(position, false));
+            drawHexLines(nearestSites);
             //var nearestLines = getNearestLinesToPoint(new Coord(position.X, position.Y));
+        }
+
+        private void drawHexLines(Site[] sites)
+        {
+            var lines = sites.SelectMany(s => s.HexLines);
+            lines = lines.Where(l => sites.Contains(l.Source) && sites.Contains(l.Target)).Distinct();
+            foreach (var line in lines)
+            {
+                line.Toggle();
+            }
         }
 
         private List<HexLine> getNearestLinesToPoint(CartesianCoord point)
@@ -133,25 +144,20 @@ namespace Graphene.Lattice
             throw new NotImplementedException();
         }
 
-        public List<Site> GetNearestSitesToPoint(CartesianCoord point)
+        public Site[] GetNearestSitesToPoint(CartesianCoord point)
         {
             var hexCoord = point.ToHexCoord();
             var rx = Math.Round(hexCoord.X);
-            Console.WriteLine(hexCoord.X + ":" + rx);
             var ry = Math.Round(hexCoord.Y);
-            Console.WriteLine(hexCoord.Y + ":" + ry);
             var rz = Math.Round(hexCoord.Z);
-            Console.WriteLine(hexCoord.Z + ":" + rz);
-            Console.WriteLine("----");
+            
             var allSites = getSites(hexCoord.X, hexCoord.Y, hexCoord.Z);
+            //HighlightSites(allSites);
+
             var xDiff = Math.Abs(hexCoord.X % 1);
             var yDiff = Math.Abs(hexCoord.Y % 1);
             var zDiff = Math.Abs(hexCoord.Z % 1);
 
-            var xSite = getXSite(rx, ry, rz);
-            var ySite = getYSite(rx, ry, rz);
-            var zSite = getZSite(rx, ry, rz);
-            HighlightSites(allSites);
 
             if (xDiff > yDiff && xDiff > zDiff)
                 rx = -ry - rz;
@@ -160,12 +166,12 @@ namespace Graphene.Lattice
             else
                 rz = -rx - ry;
 
-            var roundedHex = new HexCoord(rx, ry, rz);
-            var nearestSite = Sites.Where(s => s.Value.X == rx && s.Value.Y == ry && s.Value.Z == rz).SingleOrDefault();
-            MainWindow.Label.Text = roundedHex.ToString();
-            if (nearestSite.Value != null)
-                HighlightSite(nearestSite.Value);
-            return null;
+            //var roundedHex = new HexCoord(rx, ry, rz);
+            //var nearestSite = Sites.Where(s => s.Value.X == rx && s.Value.Y == ry && s.Value.Z == rz).SingleOrDefault();
+            //MainWindow.Label.Text = roundedHex.ToString();
+            //if (nearestSite.Value != null)
+            //    HighlightSite(nearestSite.Value);
+            return allSites;
         }
 
         private Site getXSite(double rx, double ry, double rz)
@@ -191,7 +197,7 @@ namespace Graphene.Lattice
             siteList.Add(getSite(xUpper, yLower, zUpper));
             siteList.Add(getSite(xUpper, yUpper, zLower));
             siteList.Add(getSite(xUpper, yUpper, zUpper));
-            return siteList.Where(s => s != null).ToArray();
+            return siteList.Where(s => s != null).Distinct().ToArray();
         }
 
         private Site getYSite(double rx, double ry, double rz)
