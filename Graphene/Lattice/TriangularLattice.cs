@@ -206,15 +206,23 @@ namespace Graphene.Lattice
             return line;
         }
 
+        public HexLine AddGridLine(Site origin, Site target, int lineId, BaseGrid grid)
+        {
+            var line = new HexLine(origin, target, lineId, Grid);
+            GridLines.Add(lineId, line);
+            return line;
+        }
+
         public void AddGridLines(Site site)
         {
             var dimensions = Enum.GetValues(typeof(Dimension));
             foreach (Dimension dimension in dimensions)
             {
-                if (site.FindNeighbour(dimension, 1) != null)
+                var neighbour = site.FindNeighbour(dimension, 1);
+                if (neighbour != null)
                 {
                     int thisLineId = _lineId++;
-                    AddGridLine(dimension, site, thisLineId, Grid);
+                    AddGridLine(site, neighbour, thisLineId, Grid);
                 }
             }
         }

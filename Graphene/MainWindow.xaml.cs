@@ -113,8 +113,8 @@ namespace Graphene
             {
                 foreach (var site in lattice.Sites)
                 {
-                    //App.Current.Dispatcher.Invoke(() => lattice.AddGridLines(site.Value));
-                    Thread.Sleep(1000);
+                    App.Current.Dispatcher.Invoke(() => lattice.AddGridLines(site.Value));
+                    Thread.Sleep(100);
                 }
             });
         }

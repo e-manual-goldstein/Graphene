@@ -35,6 +35,20 @@ namespace Graphene.Lattice
             Line.MouseDown += mouseClick;
         }
 
+        public HexLine(Site source, Site target, int id, BaseGrid grid)
+        {
+            Id = id;
+            Line = new Line();
+            Line.X1 = source.Location.ToAbsolute().X;
+            Line.Y1 = source.Location.ToAbsolute().Y;
+            Line.X2 = target.Location.ToAbsolute().X;
+            Line.Y2 = target.Location.ToAbsolute().Y;
+            Line.Stroke = Brushes.Gray;
+            Line.StrokeThickness = 5;
+            grid.AddElement(Line);
+            Line.MouseDown += mouseClick;
+        }
+
         private void mouseClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var line = (Line)sender;
