@@ -16,6 +16,7 @@ namespace Graphene.Lattice
         private int siteId = 0;
         private int _lineId = 0;
         public Ellipse Cursor { get; set; }
+        public Ellipse[] Cursors { get; set; }
         double _numerator;
         double _lineCount;
 
@@ -62,6 +63,7 @@ namespace Graphene.Lattice
         {
             init(grid, orientation, latticeType);
             double z = Math.Floor(_lineCount / 2);
+            //TODO: Swap out the "xPos and yPos variables + while loops" with "cell limit per row + for loop"
             double yPos = (_lineCount * Hex.UnitHeight / 2);
             double xPos = -grid.OriginX + ((Hex.UnitWidth / 2) * Math.Abs(z % 2));
             while (yPos >= (-grid.OriginY))
@@ -73,17 +75,17 @@ namespace Graphene.Lattice
                     var labelText = siteId + ": " + x + ", " + y + ", " + z;
                     var hexLocation = new HexCoord(x, y, z);
                     var location = hexLocation.ToCartesian();
-                    var location2 = orientation == Orientation.Horizontal ? new CartesianCoord(xPos, yPos) : new CartesianCoord(yPos, xPos);
-                    if (siteId == 25 || siteId == 7)
-                    {
+                    //var location2 = orientation == Orientation.Horizontal ? new CartesianCoord(xPos, yPos) : new CartesianCoord(yPos, xPos);
+                    //if (siteId == 25 || siteId == 7)
+                    //{
 
-                    }
-                    Console.WriteLine(labelText + " [" + xPos + "<" + grid.OriginX + "]");
+                    //}
+                    //Console.WriteLine(labelText + " [" + xPos + "<" + grid.OriginX + "]");
                     createNewSite(latticeType, x, y, z, labelText, location);
 
                     xPos += Hex.UnitWidth;
-                    if (xPos > grid.OriginX)
-                        Console.WriteLine(xPos + ">" + grid.OriginX + "----");
+                    //if (xPos > grid.OriginX)
+                        //Console.WriteLine(xPos + ">" + grid.OriginX + "----");
                     x++;
                     y--;
                 }
@@ -112,12 +114,11 @@ namespace Graphene.Lattice
             grid.Canvas.MouseDown += canvasClick;
             Orientation = orientation;
             Sites = new Dictionary<int, Site>();
+            Cursors = new Ellipse[3];
             GridLines = new Dictionary<int, HexLine>();
             _numerator = orientation == Orientation.Horizontal ? grid.Height : grid.Width;
             _lineCount = getMaximumLineCount(_numerator);
         }
-
-
 
         private void canvasClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -136,12 +137,21 @@ namespace Graphene.Lattice
         {
             var hexCoord = point.ToHexCoord();
             var rx = Math.Round(hexCoord.X);
+            Console.WriteLine(hexCoord.X + ":" + rx);
             var ry = Math.Round(hexCoord.Y);
+            Console.WriteLine(hexCoord.Y + ":" + ry);
             var rz = Math.Round(hexCoord.Z);
-
+            Console.WriteLine(hexCoord.Z + ":" + rz);
+            Console.WriteLine("----");
+            var allSites = getSites(hexCoord.X, hexCoord.Y, hexCoord.Z);
             var xDiff = Math.Abs(hexCoord.X % 1);
             var yDiff = Math.Abs(hexCoord.Y % 1);
             var zDiff = Math.Abs(hexCoord.Z % 1);
+
+            var xSite = getXSite(rx, ry, rz);
+            var ySite = getYSite(rx, ry, rz);
+            var zSite = getZSite(rx, ry, rz);
+            HighlightSites(allSites);
 
             if (xDiff > yDiff && xDiff > zDiff)
                 rx = -ry - rz;
@@ -156,6 +166,49 @@ namespace Graphene.Lattice
             if (nearestSite.Value != null)
                 HighlightSite(nearestSite.Value);
             return null;
+        }
+
+        private Site getXSite(double rx, double ry, double rz)
+        {
+            rx = -ry - rz;
+            return getSite(rx, ry, rz);
+        }
+
+        private Site[] getSites(double x, double y, double z)
+        {
+            var siteList = new List<Site>();
+            var xLower = Math.Floor(x);
+            var xUpper = Math.Ceiling(x);
+            var yLower = Math.Floor(y);
+            var yUpper = Math.Ceiling(y);
+            var zLower = Math.Floor(z);
+            var zUpper = Math.Ceiling(z);
+            siteList.Add(getSite(xLower, yLower, zLower));
+            siteList.Add(getSite(xLower, yLower, zUpper));
+            siteList.Add(getSite(xLower, yUpper, zLower));
+            siteList.Add(getSite(xLower, yUpper, zUpper));
+            siteList.Add(getSite(xUpper, yLower, zLower));
+            siteList.Add(getSite(xUpper, yLower, zUpper));
+            siteList.Add(getSite(xUpper, yUpper, zLower));
+            siteList.Add(getSite(xUpper, yUpper, zUpper));
+            return siteList.Where(s => s != null).ToArray();
+        }
+
+        private Site getYSite(double rx, double ry, double rz)
+        {
+            ry = -rx - rz;
+            return getSite(rx, ry, rz);
+        }
+
+        private Site getZSite(double rx, double ry, double rz)
+        {
+            rz = -rx - ry;
+            return getSite(rx, ry, rz);
+        }
+
+        private Site getSite(double x, double y, double z)
+        {
+            return Sites.Where(s => s.Value.X == x && s.Value.Y == y && s.Value.Z == z).SingleOrDefault().Value;
         }
 
         private double calculateBaseXCoordinate(double rank)
@@ -344,6 +397,26 @@ namespace Graphene.Lattice
             Cursor.Width = 20;
             Cursor.Stroke = Brushes.Cornsilk;
             Grid.AddShape(Cursor, site.Location);
+        }
+
+        public void HighlightSites(params Site[] sites)
+        {
+            foreach (var cursor in Cursors)
+            {
+                if (Grid.Canvas.Children.Contains(cursor))
+                    Grid.Canvas.Children.Remove(cursor);
+            }
+            for (int i = 0; i < sites.Length; i++)
+            {
+                //Console.WriteLine(sites[i]);
+                var cursor = new Ellipse();
+                cursor.Height = 20;
+                cursor.Width = 20;
+                cursor.Stroke = Brushes.Cornsilk;
+                Cursors[i] = cursor;
+                Grid.AddShape(cursor, sites[i].Location);
+            }
+            //Console.WriteLine("----");
         }
     }
 }
