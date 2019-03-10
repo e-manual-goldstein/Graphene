@@ -12,7 +12,7 @@ namespace Graphene
 
         public static double UnitLength = 60;
 
-        public static double DefaultMarginSize = 30;
+        public static double DefaultMarginSize = 50;
 
         public static bool ShowGridLines = false;
 

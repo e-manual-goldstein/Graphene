@@ -25,7 +25,7 @@ namespace Graphene
         public CartesianCoord ToCartesian()
         {
             var x = Constants.UnitLength * (Math.Sqrt(3) * X + Math.Sqrt(3) / 2 * Z);
-            var y = Constants.UnitLength * (Z * 3 / 2);
+            var y = -Constants.UnitLength * (Z * 3 / 2);
             return new CartesianCoord(x, y);
         }
     }

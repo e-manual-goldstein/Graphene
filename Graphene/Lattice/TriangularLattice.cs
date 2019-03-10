@@ -16,6 +16,8 @@ namespace Graphene.Lattice
         private int siteId = 0;
         private int _lineId = 0;
         public Ellipse Cursor { get; set; }
+        double _numerator;
+        double _lineCount;
 
         [Obsolete]
         public TriangularLattice(BaseGrid grid, int size, Orientation orientation, LatticeTypeEnum latticeType)
@@ -31,17 +33,11 @@ namespace Graphene.Lattice
 
         public TriangularLattice(BaseGrid grid, Orientation orientation, LatticeTypeEnum latticeType)
         {
-            Grid = grid;
-            grid.Canvas.MouseDown += canvasClick;
-            Orientation = orientation;
-            Sites = new Dictionary<int, Site>();
-            GridLines = new Dictionary<int, HexLine>();
-            var numerator = orientation == Orientation.Horizontal ? grid.Height : grid.Width;
-            var lineCount = getMaximumLineCount(numerator);
+            init(grid, orientation, latticeType);
             double xPos = -grid.OriginX + (Hex.UnitWidth / 2);
-            double yPos = (lineCount * Hex.UnitHeight / 2);
-            int i = 1;
-            double z = -Math.Floor(lineCount / 2);
+            double yPos = (_lineCount * Hex.UnitHeight / 2);
+            int i = 0;
+            double z = -Math.Floor(_lineCount / 2);
             while (yPos >= (-grid.OriginY))
             {
                 double x = calculateBaseXCoordinate(i);
@@ -50,16 +46,7 @@ namespace Graphene.Lattice
                 {
                     var labelText = siteId + ": " + x + ", " + y + ", " + z;
                     var location = orientation == Orientation.Horizontal ? new CartesianCoord(xPos, yPos) : new CartesianCoord(yPos, xPos);
-                    var site = new Site(location, siteId++, x, y, z, latticeType);
-                    var label = new TextBlock() { FontSize = 10, Text = labelText };
-                    //Console.WriteLine(labelText);
-                    AddToXRanks(site);
-                    AddToYRanks(site);
-                    AddToZRanks(site);
-                    Grid.AddShape(site.Marker, location);
-                    //Grid.Add(label, location);
-                    Sites.Add(site.Id, site);
-
+                    createNewSite(latticeType, x, y, z, labelText, location);
                     xPos += Hex.UnitWidth;
                     x++;
                     y--;
@@ -70,6 +57,67 @@ namespace Graphene.Lattice
                 z++;
             }
         }
+
+        public TriangularLattice(BaseGrid grid, Orientation orientation, LatticeTypeEnum latticeType, bool alt)
+        {
+            init(grid, orientation, latticeType);
+            double z = Math.Floor(_lineCount / 2);
+            double yPos = (_lineCount * Hex.UnitHeight / 2);
+            double xPos = -grid.OriginX + ((Hex.UnitWidth / 2) * Math.Abs(z % 2));
+            while (yPos >= (-grid.OriginY))
+            {
+                double x = calculateBaseXCoordinate(z);
+                double y = -x - z;
+                while (xPos <= (grid.OriginX))
+                {
+                    var labelText = siteId + ": " + x + ", " + y + ", " + z;
+                    var hexLocation = new HexCoord(x, y, z);
+                    var location = hexLocation.ToCartesian();
+                    var location2 = orientation == Orientation.Horizontal ? new CartesianCoord(xPos, yPos) : new CartesianCoord(yPos, xPos);
+                    if (siteId == 25 || siteId == 7)
+                    {
+
+                    }
+                    Console.WriteLine(labelText + " [" + xPos + "<" + grid.OriginX + "]");
+                    createNewSite(latticeType, x, y, z, labelText, location);
+
+                    xPos += Hex.UnitWidth;
+                    if (xPos > grid.OriginX)
+                        Console.WriteLine(xPos + ">" + grid.OriginX + "----");
+                    x++;
+                    y--;
+                }
+                xPos = (-grid.OriginX) + ((Hex.UnitWidth / 2) * Math.Abs((1 + z) % 2));
+                yPos -= Hex.UnitHeight;
+                z--;
+            }
+        }
+
+        private void createNewSite(LatticeTypeEnum latticeType, double x, double y, double z, string labelText, CartesianCoord location)
+        {
+            var site = new Site(location, siteId++, x, y, z, latticeType);
+            var label = new TextBlock() { FontSize = 10, Text = labelText };
+            //Console.WriteLine(labelText);
+            AddToXRanks(site);
+            AddToYRanks(site);
+            AddToZRanks(site);
+            Grid.AddShape(site.Marker, location);
+            Grid.Add(label, location);
+            Sites.Add(site.Id, site);
+        }
+
+        private void init(BaseGrid grid, Orientation orientation, LatticeTypeEnum latticeType)
+        {
+            Grid = grid;
+            grid.Canvas.MouseDown += canvasClick;
+            Orientation = orientation;
+            Sites = new Dictionary<int, Site>();
+            GridLines = new Dictionary<int, HexLine>();
+            _numerator = orientation == Orientation.Horizontal ? grid.Height : grid.Width;
+            _lineCount = getMaximumLineCount(_numerator);
+        }
+
+
 
         private void canvasClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -91,9 +139,9 @@ namespace Graphene.Lattice
             var ry = Math.Round(hexCoord.Y);
             var rz = Math.Round(hexCoord.Z);
 
-            var xDiff = hexCoord.X % 1;
-            var yDiff = hexCoord.Y % 1;
-            var zDiff = hexCoord.Z % 1;
+            var xDiff = Math.Abs(hexCoord.X % 1);
+            var yDiff = Math.Abs(hexCoord.Y % 1);
+            var zDiff = Math.Abs(hexCoord.Z % 1);
 
             if (xDiff > yDiff && xDiff > zDiff)
                 rx = -ry - rz;
@@ -103,23 +151,25 @@ namespace Graphene.Lattice
                 rz = -rx - ry;
 
             var roundedHex = new HexCoord(rx, ry, rz);
-            var nearestSite = Sites.Where(s => s.Value.X == rx && s.Value.Y == ry && s.Value.Z == rz).Single();
+            var nearestSite = Sites.Where(s => s.Value.X == rx && s.Value.Y == ry && s.Value.Z == rz).SingleOrDefault();
             MainWindow.Label.Text = roundedHex.ToString();
-            HighlightSite(nearestSite.Value);
+            if (nearestSite.Value != null)
+                HighlightSite(nearestSite.Value);
             return null;
         }
 
         private double calculateBaseXCoordinate(double rank)
         {
-            double valueAtAxis = -Math.Floor(Constants.BaseGridWidth / (2 * Hex.UnitWidth));
-            double distanceToAxis = Math.Floor(Constants.BaseGridHeight / (2 * Hex.UnitHeight)) - rank;
-            //double returnValue = ((result - (result % 2)) / 2) - (result % 2);
-            return (((valueAtAxis + distanceToAxis) + rank % 2) / 2) - 1;
+            double valueAtAxis = -Math.Round(Constants.BaseGridWidth / (2 * Hex.UnitWidth));
+            var adjustment = (rank / 2) - (Math.Abs(rank % 2) / 2);
+            var returnValue = valueAtAxis - adjustment;
+            //Console.WriteLine(rank + ", " + (rank % 2) / 2);
+            return valueAtAxis - adjustment;
         }
 
         private double getMaximumLineCount(double numerator)
         {
-            var count = Math.Floor(numerator / Hex.UnitHeight);
+            var count = Math.Ceiling(numerator / Hex.UnitHeight);
             return (count % 2 == 0) ? count-- : count;
         }
 
@@ -285,7 +335,7 @@ namespace Graphene.Lattice
             Cursor.Height = 20;
             Cursor.Width = 20;
             Cursor.Stroke = Brushes.Cornsilk;
-            Grid.AddShape(Cursor, site.Location.ToAbsolute());
+            Grid.AddShape(Cursor, site.Location);
         }
     }
 }

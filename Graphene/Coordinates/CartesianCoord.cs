@@ -19,9 +19,18 @@ namespace Graphene
         public CartesianCoord(Point point, bool absolute = true)
         {
             X = absolute ? point.X : point.X - ((Constants.BaseGridWidth + Constants.DefaultMarginSize * 2) / 2); ;
-            Y = absolute ? point.Y : ((Constants.BaseGridHeight + Constants.DefaultMarginSize * 2) / 2) - point.Y;
+            Y = absolute ? point.Y : point.Y - ((Constants.BaseGridHeight + Constants.DefaultMarginSize * 2) / 2);
         }
 
+        #region Properties
+        public double AbsoluteX
+        {
+            get
+            {
+                return ((Constants.BaseGridWidth + Constants.DefaultMarginSize * 2) / 2) + X;
+            }
+        }
+        #endregion
 
         public CartesianCoord Add(Dimension dimension, int magnitude)
         {
@@ -95,7 +104,7 @@ namespace Graphene
 
         public HexCoord ToHexCoord()
         {
-            var x = (Math.Sqrt(3) / 3 * X - 1 / 3 * Y) / Constants.UnitLength;
+            var x = ((Math.Sqrt(3) * X / 3) - (Y / 3)) / Constants.UnitLength;
             var z = (Y * 2 / 3) / Constants.UnitLength;
             var y = -x - z;
             return new HexCoord(x, y, z);

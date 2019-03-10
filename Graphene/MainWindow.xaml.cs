@@ -10,6 +10,7 @@ using Graphene.Lattice;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
+using System.IO;
 
 namespace Graphene
 {
@@ -50,6 +51,7 @@ namespace Graphene
             //DisplayService = initialisedServices.OfType<DisplayProgrammaticService>().FirstOrDefault();
             //DisplayController = new DisplayController();
             InitializeComponent();
+            loadPreviousSettings();
             Tableau = new Canvas();
             Grid = new BaseGrid(Height, Width, Tableau);
             Tableau.Width = Width;
@@ -57,52 +59,19 @@ namespace Graphene
 
             Tableau.Background = Brushes.LightGray;
             Content = Tableau;
-            var greenLattice = new TriangularLattice(Grid, Orientation.Horizontal, LatticeTypeEnum.Green);
+            var greenLattice = new TriangularLattice(Grid, Orientation.Horizontal, LatticeTypeEnum.Green,true);
             if (Hex.ShowGridLines)
             {
-                foreach (var site in greenLattice.Sites)
-                {
-                    greenLattice.AddGridLines(site.Value);
-                }
+                createGridBuilder(greenLattice);
             }
             var testPoint = new Ellipse();
             testPoint.Height = 20;
             testPoint.Width = 20;
             testPoint.Fill = Brushes.Chartreuse;
+            Grid.AddShape(testPoint, greenLattice.Sites[20].Location);
             
-            Grid.AddShape(testPoint, greenLattice.Sites[40].Location);
 
-           
-            //int lineId = 0;
-            ////greenLattice.AddGridLine(Dimension.Gamma, greenLattice.Sites[98].Location, lineId++, Grid);
-            var metronomeSwitch = new Button();
-            metronomeSwitch.Height = 30;
-            metronomeSwitch.Width = 100;
-            metronomeSwitch.Content = "On/Off";
-            metronomeSwitch.Click += metronomeClick;
-            Tableau.Children.Add(metronomeSwitch);
-
-            var tapButton = new Button();
-            tapButton.Height = 30;
-            tapButton.Width = 100;
-            tapButton.Content = "Tap";
-            tapButton.Click += tapButtonClick;
-            Canvas.SetLeft(tapButton, 100);
-            Tableau.Children.Add(tapButton);
-
-            var resetButton = new Button();
-            resetButton.Height = 30;
-            resetButton.Width = 100;
-            resetButton.Content = "(Re)Set";
-            resetButton.Click += resetButtonClick;
-            Canvas.SetLeft(resetButton, 200);
-            Tableau.Children.Add(resetButton);
-
-            InputBox = new TextBox();
-            InputBox.Height = 30;
-            InputBox.Width = 80;
-            Canvas.SetLeft(InputBox, 300);
-            Tableau.Children.Add(InputBox);
+          
 
 
             Label = new TextBlock() { Text = "000.00", FontSize = 15 };
@@ -128,10 +97,41 @@ namespace Graphene
             Closing += mainWindowClosing;
         }
 
-        
+        private void loadPreviousSettings()
+        {
+            var settings = AppSettings.Instance;
+            if (settings.Custom)
+            {
+                Top = settings.WindowTop;
+                Left = settings.WindowLeft;
+            }
+        }
+
+        private void createGridBuilder(TriangularLattice lattice)
+        {
+            var gridBuilder = Task.Run(() =>
+            {
+                foreach (var site in lattice.Sites)
+                {
+                    //App.Current.Dispatcher.Invoke(() => lattice.AddGridLines(site.Value));
+                    Thread.Sleep(1000);
+                }
+            });
+        }
+
         private void mainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             metronomeActive = false;
+            saveWindowLocation(this.Top, this.Left);
+        }
+
+        private void saveWindowLocation(double top, double left)
+        {
+            var appSettings = AppSettings.Instance;
+            appSettings.WindowTop = top;
+            appSettings.WindowLeft = left;
+            appSettings.Custom = true;
+            AppSettings.SaveSettingsToFile();
         }
 
         private void resetButtonClick(object sender, RoutedEventArgs e)
@@ -232,6 +232,41 @@ namespace Graphene
             {
                 light.SwitchOff();
             }
+        }
+
+        private void addButtons()
+        {
+
+            //int lineId = 0;
+            ////greenLattice.AddGridLine(Dimension.Gamma, greenLattice.Sites[98].Location, lineId++, Grid);
+            var metronomeSwitch = new Button();
+            metronomeSwitch.Height = 30;
+            metronomeSwitch.Width = 100;
+            metronomeSwitch.Content = "On/Off";
+            metronomeSwitch.Click += metronomeClick;
+            Tableau.Children.Add(metronomeSwitch);
+
+            var tapButton = new Button();
+            tapButton.Height = 30;
+            tapButton.Width = 100;
+            tapButton.Content = "Tap";
+            tapButton.Click += tapButtonClick;
+            Canvas.SetLeft(tapButton, 100);
+            Tableau.Children.Add(tapButton);
+
+            var resetButton = new Button();
+            resetButton.Height = 30;
+            resetButton.Width = 100;
+            resetButton.Content = "(Re)Set";
+            resetButton.Click += resetButtonClick;
+            Canvas.SetLeft(resetButton, 200);
+            Tableau.Children.Add(resetButton);
+
+            InputBox = new TextBox();
+            InputBox.Height = 30;
+            InputBox.Width = 80;
+            Canvas.SetLeft(InputBox, 300);
+            Tableau.Children.Add(InputBox);
         }
     }
 }

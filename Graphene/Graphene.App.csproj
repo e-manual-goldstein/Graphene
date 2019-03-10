@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppSettings.cs" />
     <Compile Include="Coordinates\Coord.cs" />
     <Compile Include="CellFactory.cs" />
     <Compile Include="Channel.cs" />

@@ -58,23 +58,28 @@ namespace Graphene.Lattice
 
         public int Z { get; set; }
 
+        public override string ToString()
+        {
+            return "(" + X + ", " + Y + ", " + Z + ")";
+        }
+
         public Site FindNeighbour(Dimension dimension, int magnitude)
         {
-            var rank = getRank(this, dimension);
+            var rank = GetRank(dimension);
             var filter = FindDimensionFilter(dimension, magnitude);
             return rank.SingleOrDefault(filter);
         }
 
-        private List<Site> getRank(Site site, Dimension dimension)
+        public List<Site> GetRank(Dimension dimension)
         {
             switch (dimension)
             {
                 case Dimension.Alpha:
-                    return site.XRank;
+                    return XRank;
                 case Dimension.Beta:
-                    return site.YRank;
+                    return YRank;
                 case Dimension.Gamma:
-                    return site.ZRank;
+                    return ZRank;
                 default:
                     throw new ArgumentException("Unknown Dimension");
             };
